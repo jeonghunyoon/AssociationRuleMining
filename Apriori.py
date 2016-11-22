@@ -11,10 +11,10 @@ def createC1(dataSet):
     return map(frozenset, candidate1)
 
 
-### 2. 후보군  candidate 생성. 예를 들어, {{1}, {2}, {3}}, k=2 가 input 으로 들어오면, {{1,2}, {2,3}, {1,3}} 이 생성될 것이다.
+### 2. 후보군 candidate 생성. 예를 들어, {{1}, {2}, {3}}, k=2 가 input 으로 들어오면, {{1,2}, {2,3}, {1,3}} 이 생성될 것이다.
 # TODO 나중에 좀 더 보자!!
-def createKCandidate(itemList, K):
-    kCandidates = []
+def createCandidatesK(itemList, K):
+    candidatesK = []
     nItems = len(itemList)
 
     for i in range(nItems):
@@ -23,26 +23,41 @@ def createKCandidate(itemList, K):
             leftItem = list(itemList[i])[:K-2]
             rightItem = list(itemList[j])[:K-2]
             if leftItem == rightItem:
-                kCandidates.append(itemList[i] | itemList[j])
-    return kCandidates
+                candidatesK.append(itemList[i] | itemList[j])
+    return candidatesK
 
 
 ### 3. 후보군으로 들어온 item list 에 대하여, dataSet을 scan하며 지지도(support)를 계산한다.
-def scanDataSet(dataSet, candidateK, minSupport):
+def scanDataSet(dataSet, kCandidate, minSupport):
     supportCount = {}
     for data in dataSet:
-        for items in candidateK:
+        for items in kCandidate:
             if items.issubset(data):
                 if not supportCount.has_key(items): supportCount[items] = 1
                 else:
                     supportCount[items] += 1
     nDataSet = float(len(dataSet))
     # 다음번(현재의 item들을 조합하여) 후보군을 생성하기 위하여 리스트를 생성
-    retList = []
-    supporOfItems = {}
+    itemList = []
+    supportOfItems = {}
     for key in supportCount:
         support = supportCount[key] / nDataSet
         if support >= minSupport:
-            retList.insert(0, key)
-        supporOfItems[key] = support
-    return retList, supporOfItems
+            itemList.insert(0, key)
+            supportOfItems[key] = support
+    return itemList, supportOfItems
+
+
+### 4. 위의 method 를 조합하여, apriori 알고리즘을 수행한다.
+def apriori(dataSet, minSupport = 0.5):
+    candidates1 = createC1(dataSet)
+    itemList1, supportOfItems = scanDataSet(dataSet, candidates1, minSupport)
+    list = [itemList1]
+    k = 2
+    while (len(list[k-2]) > 0):
+        candidatesK = createCandidatesK(list[k-2], k)
+        itemListK, supportOfItemsK = scanDataSet(dataSet, candidatesK, minSupport)
+        supportOfItems.update(supportOfItemsK)
+        list.append(itemListK)
+        k += 1
+    return list, supportOfItems
