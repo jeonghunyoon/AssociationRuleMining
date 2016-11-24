@@ -61,3 +61,23 @@ def apriori(dataSet, minSupport = 0.5):
         list.append(itemListK)
         k += 1
     return list, supportOfItems
+
+
+### 5. 발생 빈도 수가 높은 아이템 freqItem 과 그것의 하위 집합이 input 으로 들어 갔을 때, 발생 가능 한 rule의 조합을 생성한다.
+def ruleFromConseq(freqItem, subItem, supportData, result, minConf = 0.7):
+    m = len(subItem[0])
+    if (len(freqItem) > (m + 1)):
+        # subItemCan 은, subItem 들을 조합하여, 아이템의 갯수가 1개 더 많은 candidate 를 만드는 것이다.
+        targetItem = createCandidatesK(subItem, m + 1)
+        # 먼저 confidence 를 계산부터 한다.
+        targetItem = calcConf(freqItem, targetItem, supportData, result, minConf)
+        # target item 의 갯수가 1인 것부터 시작해서 차츰 올라갈 것인데, 최소 신뢰도를 만족하는 것만 고려한다.
+        if (len(targetItem) > 1):
+            ruleFromConseq(freqItem, targetItem, supportData, result, minConf)
+
+
+### 6. target : subItemCan 의 원소들, from : freqItem - subItemCan
+def calcConf(freqItem, subItemCan, supportData, result, minConf):
+    goodRules = []
+
+    return goodRules
